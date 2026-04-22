@@ -8,20 +8,25 @@ export async function login(email, password) {
     });
 
     if (error) {
-        alert("Errore login");
+        alert(error.message);
         return null;
     }
 
     return data.user;
 }
 
-// 📌 Recupera utente da tabella users
+// 📌 DATI UTENTE
 export async function getUserData(userId) {
-    const { data } = await supabase
+    const { data, error } = await supabase
         .from("users")
         .select("*")
         .eq("id", userId)
         .single();
+
+    if (error) {
+        alert("Utente non trovato nel database");
+        return null;
+    }
 
     return data;
 }

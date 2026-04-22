@@ -7,9 +7,8 @@
 </head>
 <body>
 
-<h1>Lavori da Svolgere</h1>
+<h1>Lavori da Svolgere - <span id="titolo-area"></span></h1>
 
-<!-- 👇 INPUT SOLO RESPONSABILE / CAPO -->
 <div id="input-area">
     <input id="pressa" placeholder="Pressa">
     <input type="time" id="orario">
@@ -24,6 +23,7 @@
 <table id="tabella-lavori">
 <thead>
 <tr>
+<th>Area</th>
 <th>Pressa</th>
 <th>Ora</th>
 <th>Intervento</th>
@@ -38,20 +38,17 @@
 import { initApp } from "./js/app.js";
 
 const user = JSON.parse(localStorage.getItem("user"));
-
 initApp(user);
+</script>
 
-// 🔒 BLOCCO OPERATORI
-if (user.ruolo === "operatore") {
-    document.getElementById("input-area").style.display = "none";
-}
-</script>
 <script>
+// 🔄 SW AUTO UPDATE
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
-    .then(() => console.log("Service Worker registrato"))
-    .catch(err => console.log("Errore SW:", err));
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    reg.update();
+  });
 }
 </script>
+
 </body>
 </html>

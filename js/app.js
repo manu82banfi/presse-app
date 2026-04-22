@@ -8,33 +8,66 @@ export async function initApp(user) {
 
     caricaPresse();
     subscribeRealtime();
+    aggiornaUI();
+}
+
+// 🎨 UI BASE SU RUOLO
+function aggiornaUI() {
+    if (currentUser.ruolo === "operatore") {
+        document.getElementById("input-area").style.display = "none";
+    }
+
+    // 👨‍💼 capo vede tutto
+    if (currentUser.ruolo === "capo") {
+        document.getElementById("titolo-area").textContent = "TUTTE LE AREE";
+    } else {
+        document.getElementById("titolo-area").textContent = currentUser.area;
+    }
 }
 
 // 📥 CARICA PRESSE
 async function caricaPresse() {
     let query = supabase.from("presse").select("*");
 
-    // 👇 filtro per ruolo
-    if (currentUser.ruolo === "responsabile" || currentUser.ruolo === "operatore") {
+    if (currentUser.ruolo !== "capo") {
         query = query.eq("area", currentUser.area);
     }
 
-    const { data } = await query;
+    const { data } = await query.order("ora", { ascending: true });
 
     renderTable(data);
 }
 
-// 🔄 REALTIME
+// 🔄 REALTIME (MIGLIORATO)
 function subscribeRealtime() {
     supabase
-        .channel("presse")
-        .on("postgres_changes", { event: "*", schema: "public", table: "presse" }, () => {
+        .channel("presse-changes")
+        .on("postgres_changes", { event: "*", schema: "public", table: "presse" }, payload => {
             caricaPresse();
+
+            // 🔔 NOTIFICA BASE
+            mostraNotifica("Aggiornamento ricevuto");
         })
         .subscribe();
 }
 
-// 🎨 RENDER TABELLA
+// 🔔 NOTIFICA
+function mostraNotifica(msg) {
+    const div = document.createElement("div");
+    div.textContent = msg;
+    div.style.position = "fixed";
+    div.style.bottom = "20px";
+    div.style.right = "20px";
+    div.style.background = "#070738";
+    div.style.padding = "10px";
+    div.style.borderRadius = "5px";
+
+    document.body.appendChild(div);
+
+    setTimeout(() => div.remove(), 3000);
+}
+
+// 🎨 RENDER
 function renderTable(presse) {
     const tbody = document.querySelector("#tabella-lavori tbody");
     tbody.innerHTML = "";
@@ -43,6 +76,7 @@ function renderTable(presse) {
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
+            <td>${p.area}</td>
             <td>${p.pressa}</td>
             <td>${p.ora}</td>
             <td>${p.intervento}</td>
@@ -61,7 +95,7 @@ function renderTable(presse) {
     });
 }
 
-// ➕ AGGIUNGI PRESSA
+// ➕ INSERIMENTO
 window.aggiungiPressa = async function () {
     const pressa = document.getElementById("pressa").value;
     const ora = document.getElementById("orario").value;
@@ -80,10 +114,15 @@ window.aggiungiPressa = async function () {
     ]);
 };
 
-// 🔄 CAMBIA STATO
+// 🔄 STATO
 window.updateStato = async function (id, stato) {
+    await supabase.from("presse").update({ stato }).eq("id", id);
+};
+
+// 👥 OPERATORI ON/OFF
+window.toggleOperatore = async function (nome) {
     await supabase
-        .from("presse")
-        .update({ stato })
-        .eq("id", id);
+        .from("users")
+        .update({ area: currentUser.area })
+        .eq("nome", nome);
 };
