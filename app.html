@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<title>Presse</title>
+</head>
+<body>
+
+<h1>Lavori da Svolgere</h1>
+
+<!-- 👇 INPUT SOLO RESPONSABILE / CAPO -->
+<div id="input-area">
+    <input id="pressa" placeholder="Pressa">
+    <input type="time" id="orario">
+    <select id="atz">
+        <option>Avviare</option>
+        <option>Cambi</option>
+    </select>
+    <input id="note" placeholder="Note">
+    <button onclick="aggiungiPressa()">Aggiungi</button>
+</div>
+
+<table id="tabella-lavori">
+<thead>
+<tr>
+<th>Pressa</th>
+<th>Ora</th>
+<th>Intervento</th>
+<th>Note</th>
+<th>Stato</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<script type="module">
+import { initApp } from "./js/app.js";
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+initApp(user);
+
+// 🔒 BLOCCO OPERATORI
+if (user.ruolo === "operatore") {
+    document.getElementById("input-area").style.display = "none";
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log("Service Worker registrato"))
+    .catch(err => console.log("Errore SW:", err));
+}
+</script>
+</body>
+</html>
