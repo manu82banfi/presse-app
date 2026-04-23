@@ -15,20 +15,24 @@
 <script type="module">
 import { login, getUserData } from "./js/auth.js";
 
-// ✅ COLLEGA IL CLICK QUI (NON onclick)
 document.getElementById("loginBtn").addEventListener("click", doLogin);
 
 async function doLogin() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    console.log("CLICK LOGIN"); // debug
-
     const user = await login(email, password);
+    console.log("USER AUTH:", user);
+
     if (!user) return;
 
     const userData = await getUserData(user.id);
-    if (!userData) return;
+    console.log("USER DB:", userData);
+
+    if (!userData) {
+        alert("Utente non trovato nella tabella users");
+        return;
+    }
 
     localStorage.setItem("user", JSON.stringify(userData));
 
